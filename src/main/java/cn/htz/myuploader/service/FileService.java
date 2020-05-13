@@ -4,10 +4,13 @@ import cn.htz.myuploader.config.UploadConfig;
 import cn.htz.myuploader.dao.FileDao;
 import cn.htz.myuploader.model.File;
 import cn.htz.myuploader.utils.FileUtils;
+import cn.htz.myuploader.utils.UpdateJson;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
 
@@ -74,5 +77,31 @@ public class FileService {
         File file = new File();
         file.setMd5(md5);
         return fileDao.getByFile(file) == null;
+    }
+
+    public void update(UpdateJson updateJson) throws IOException {
+        String path = UploadConfig.path + "UpdateManifest.json";
+        JSONObject updateObject = new JSONObject();
+        JSONObject patchObject = new JSONObject();
+        JSONObject p1Object = new JSONObject();
+        JSONObject v1Object = new JSONObject();
+        v1Object.put("patchURL", "http://htzshanghai.top/resources/apk/update/v1/diff.patch");
+        v1Object.put("tip", "patch v1");
+        v1Object.put("hash", updateJson.getMd5());
+        v1Object.put("size", updateJson.getSize());
+        p1Object.put("v1", v1Object);
+        patchObject.put("patchInfo", p1Object);
+
+        updateObject.put("minVersion", "1");
+        updateObject.put("minAllowPatchVersion", updateJson.getVersionNumber());
+        updateObject.put("newVersion", updateJson.getVersionNumber());
+        updateObject.put("newVersionName", updateJson.getVersionName());
+        updateObject.put("tip", updateJson.getContent());
+        updateObject.put("size", updateJson.getSize());
+        updateObject.put("apkURL", "http://121.36.132.237/resources/apk/release/" + updateJson.getName());
+        updateObject.put("hash", updateJson.getMd5());
+        updateObject.put("patchInfo", patchObject);
+
+        FileUtils.write(path, new ByteArrayInputStream(updateObject.toString().getBytes()));
     }
 }
