@@ -12,4 +12,5 @@ mybatis:
   mapper-locations: classpath:mapper/*Mapper.xml
   type-aliases-package: cn.htz.myuploader.model
 upload:
-  path: /var/www/html/resources/apk/release/ #文件上传路径
+  path: /root/upload/ #apk文件上传路径
+  apkPath: /var/www/html/resources/apk/release/ #文件上传路径

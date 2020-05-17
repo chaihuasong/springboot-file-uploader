@@ -35,9 +35,14 @@ public class FileService {
     public void upload(String name,
                        String md5,
                        MultipartFile file) throws IOException {
-        String path = UploadConfig.path + file.getOriginalFilename();//generateFileName();
+        String uploadPath = UploadConfig.path;
+        String ext = FileUtils.getExt(file);
+        if (ext.equals("apk")) {
+            uploadPath = UploadConfig.apkPath;
+        }
+        String path = uploadPath + file.getOriginalFilename();//generateFileName();
         FileUtils.write(path, file.getInputStream());
-        fileDao.save(new File(name, md5, path, new Date(), FileUtils.getExt(file)));
+        fileDao.save(new File(name, md5, path, new Date(), ext));
     }
 
     /**
@@ -57,11 +62,15 @@ public class FileService {
                                 Integer chunk,
                                 MultipartFile file) throws IOException {
         String fileName = getFileName(md5, chunks, name);
-        FileUtils.writeWithBlok(UploadConfig.path + fileName, size, file.getInputStream(), file.getSize(), chunks, chunk);
+        String uploadPath = UploadConfig.path;
+        if (fileName != null && fileName.endsWith(".apk")) {
+            uploadPath = UploadConfig.apkPath;
+        }
+        FileUtils.writeWithBlok(uploadPath + fileName, size, file.getInputStream(), file.getSize(), chunks, chunk);
         addChunk(md5, chunk);
         if (isUploaded(md5)) {
             removeKey(md5);
-            fileDao.save(new File(name, md5, UploadConfig.path + fileName, new Date(), FileUtils.getExt(file)));
+            fileDao.save(new File(name, md5, uploadPath + fileName, new Date(), FileUtils.getExt(file)));
         }
     }
 
@@ -80,7 +89,7 @@ public class FileService {
     }
 
     public void update(UpdateJson updateJson) throws IOException {
-        String path = UploadConfig.path + "UpdateManifest.json";
+        String path = UploadConfig.apkPath + "UpdateManifest.json";
         JSONObject updateObject = new JSONObject();
         JSONObject patchObject = new JSONObject();
         JSONObject p1Object = new JSONObject();
@@ -104,7 +113,7 @@ public class FileService {
 
         FileUtils.write(path, new ByteArrayInputStream(updateObject.toString().getBytes()));
 
-        path = UploadConfig.path + "release_info.txt";
+        path = UploadConfig.apkPath + "release_info.txt";
 
         FileUtils.write(path, updateJson.getName(), updateJson.getVersionName(), updateJson.getContent());
 
