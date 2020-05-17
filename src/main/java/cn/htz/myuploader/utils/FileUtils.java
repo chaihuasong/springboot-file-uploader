@@ -29,6 +29,49 @@ public class FileUtils {
     }
 
     /**
+     * 写入文件
+     * @param target
+     * @param name
+     * @param versionName
+     * @param content
+     * @throws IOException
+     */
+    public static void write(String target, String name, String versionName, String content) throws IOException {
+        String result = ReadString(target);
+        result = "v" + versionName + " (" + name + ")\n" + content + "\n\n" + result;
+
+        write(target, new ByteArrayInputStream(result.getBytes()));
+    }
+
+    /**
+     * 写入文件
+     * @param target
+     * @throws IOException
+     */
+    public static void write(String target, String name) throws IOException {
+        String result = ReadString(target);
+        result = result.replaceAll("apk/release/.+?\"><font", "apk/release/" + name + "\"><font");
+
+        write(target, new ByteArrayInputStream(result.getBytes()));
+    }
+
+    //将file转化成string
+    private static String ReadString(String filePath)throws IOException{
+        //对一串字符进行操作
+        StringBuffer fileData = new StringBuffer();
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        char[] buf = new char[1024];
+        int numRead=0;
+        while((numRead=reader.read(buf)) != -1){
+            String readData = String.valueOf(buf, 0, numRead);
+            fileData.append(readData);
+        }
+        //缓冲区使用完必须关掉
+        reader.close();
+        return fileData.toString();
+    }
+
+    /**
      * 分块写入文件
      * @param target
      * @param targetSize

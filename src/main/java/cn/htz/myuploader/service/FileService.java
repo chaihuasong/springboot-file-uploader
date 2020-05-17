@@ -103,5 +103,12 @@ public class FileService {
         updateObject.put("patchInfo", patchObject);
 
         FileUtils.write(path, new ByteArrayInputStream(updateObject.toString().getBytes()));
+
+        path = UploadConfig.path + "release_info.txt";
+
+        FileUtils.write(path, updateJson.getName(), updateJson.getVersionName(), updateJson.getContent());
+
+        path = "/var/www/html/redirect.html";
+        FileUtils.write(path, updateJson.getName());
     }
 }
